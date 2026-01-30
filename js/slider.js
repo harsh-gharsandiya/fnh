@@ -5,16 +5,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalImages = slider.children.length;
     let autoSlideInterval;
 
-    const currentImageSpan = document.getElementById("currentImage");
-    const totalImagesSpan = document.getElementById("totalImages");
-
-    // Update total images count
-    totalImagesSpan.textContent = totalImages;
-
     function getVisibleCount() {
         if (window.innerWidth <= 575) return 1;
         if (window.innerWidth <= 991) return 2;
-        return 4;
+        return 3;
     }
 
     function getSlidePercent() {
@@ -23,11 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateSlider() {
         slider.style.transform = `translateX(-${currentIndex * getSlidePercent()}%)`;
-        updateCounter();
-    }
-
-    function updateCounter() {
-        currentImageSpan.textContent = currentIndex + 1;
     }
 
     // Next button
