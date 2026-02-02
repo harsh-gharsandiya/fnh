@@ -1017,11 +1017,12 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    /* background-image: url("../img/building/MBH_building"); or texture */
-    /* background-size: cover;
+
+    background-image: url("../img/icon/right-bg.png");
+    background-size: 100% 100%;
     background-position: center;
-    background-repeat: no-repeat; */
-    background: #000;
+    background-repeat: no-repeat;
+    background-color: #000;
 }
 
 .right-top {
@@ -1348,7 +1349,7 @@ body {
     color: #fff;
     font-size: 32px;
     margin-bottom: 20px;
-    font-weight: 600;
+    font-weight: bolder;
     letter-spacing: 1px;
 }
 
