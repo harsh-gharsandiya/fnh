@@ -1,4 +1,3 @@
-// IMPROVED IMAGE SLIDER
 let autoSlideInterval;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -7,7 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!slider) return;
 
-    const totalImages = slider.children.length;
+    // Count all children (videos AND images)
+    const totalSlides = slider.children.length;
 
     function pauseAllVideos() {
         slider.querySelectorAll("video").forEach((video) => {
@@ -18,18 +18,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function getVisibleCount() {
-        if (window.innerWidth <= 575) return 1;
-        if (window.innerWidth <= 991) return 2;
-        return 3;
+    function shouldResetOnMobile(index) {
+        return window.innerWidth <= 767 && index >= totalSlides - 1;
     }
 
-    function getSlidePercent() {
-        return 100 / getVisibleCount();
+    function getVisibleCount() {
+        if (window.innerWidth <= 767) return 1; // Mobile: 1 slide
+        if (window.innerWidth <= 991) return 2; // Tablet: 2 slides
+        return 3; // Desktop: 3 slides
     }
 
     function updateSlider() {
-        slider.style.transform = `translateX(-${currentIndex * getSlidePercent()}%)`;
+        const slideWidth = slider.children[0].offsetWidth;
+
+        if (shouldResetOnMobile(currentIndex)) {
+            currentIndex = 0;
+        }
+
+        slider.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
     }
 
     // Auto-slide function
@@ -38,12 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
         autoSlideInterval = setInterval(() => {
             pauseAllVideos();
 
-            const visible = getVisibleCount();
-            const maxIndex = totalImages - visible;
+            const visibleCount = getVisibleCount();
+            const maxIndex = totalSlides - visibleCount;
 
             if (currentIndex < maxIndex) {
                 currentIndex++;
             } else {
+                currentIndex = 0;
+            }
+
+            if (window.innerWidth <= 767 && currentIndex === maxIndex) {
                 currentIndex = 0;
             }
 
@@ -56,8 +66,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nextBtn) {
         nextBtn.onclick = () => {
             pauseAllVideos();
-            const visible = getVisibleCount();
-            const maxIndex = totalImages - visible;
+            clearInterval(autoSlideInterval);
+
+            const visibleCount = getVisibleCount();
+            const maxIndex = totalSlides - visibleCount;
 
             if (currentIndex < maxIndex) {
                 currentIndex++;
@@ -66,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             updateSlider();
+            startAutoSlide();
         };
     }
 
@@ -74,8 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (prevBtn) {
         prevBtn.onclick = () => {
             pauseAllVideos();
-            const visible = getVisibleCount();
-            const maxIndex = totalImages - visible;
+            clearInterval(autoSlideInterval);
+
+            const visibleCount = getVisibleCount();
+            const maxIndex = totalSlides - visibleCount;
 
             if (currentIndex > 0) {
                 currentIndex--;
@@ -84,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             updateSlider();
+            startAutoSlide();
         };
     }
 
@@ -94,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!video || !playBtn) return;
 
-        // Click on play button
         playBtn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -110,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Click on video itself
         video.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -126,19 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // When video starts playing
         video.addEventListener("play", () => {
             clearInterval(autoSlideInterval);
             slide.classList.add("playing");
         });
 
-        // When video pauses
         video.addEventListener("pause", () => {
             slide.classList.remove("playing");
             startAutoSlide();
         });
 
-        // When video ends
         video.addEventListener("ended", () => {
             slide.classList.remove("playing");
             video.currentTime = 0;
@@ -147,11 +158,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Responsive handling
+    let resizeTimer;
     window.addEventListener("resize", () => {
-        updateSlider();
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const visibleCount = getVisibleCount();
+            const maxIndex = totalSlides - visibleCount;
+
+            // Reset if current position is invalid
+            if (currentIndex > maxIndex) {
+                currentIndex = 0;
+            }
+
+            updateSlider();
+            clearInterval(autoSlideInterval);
+            startAutoSlide();
+        }, 250);
     });
 
-    // Start auto-slide
+    // Initialize
+    updateSlider();
     startAutoSlide();
 });
 
@@ -181,85 +207,106 @@ if (modal && modalImg && closeModal) {
 
 // GOOGLE REVIEW SLIDER
 document.addEventListener("DOMContentLoaded", function () {
-    const reviews = document.querySelectorAll(".review-card");
-    const dots = document.querySelectorAll(".dot");
+    const reviews = Array.from(document.querySelectorAll(".review-card"));
     const prevBtn = document.getElementById("reviewPrev");
     const nextBtn = document.getElementById("reviewNext");
+    const dotsContainer = document.querySelector(".review-dots");
 
     if (!reviews.length) return;
 
-    let currentSlide = 0;
-    let reviewAutoSlideInterval;
-    const REVIEWS_PER_VIEW = window.innerWidth <= 767 ? 1 : 2;
+    let currentPage = 0;
+    let autoSlideInterval;
 
-    function showSlide(n) {
-        const totalSlides = Math.ceil(reviews.length / REVIEWS_PER_VIEW);
+    function getReviewsPerView() {
+        return window.innerWidth <= 767 ? 1 : 2;
+    }
 
-        if (n >= totalSlides) {
-            currentSlide = 0;
-        } else if (n < 0) {
-            currentSlide = totalSlides - 1;
-        } else {
-            currentSlide = n;
-        }
+    function getTotalPages() {
+        return Math.ceil(reviews.length / getReviewsPerView());
+    }
 
-        reviews.forEach((review) => review.classList.remove("active"));
-        dots.forEach((dot) => dot.classList.remove("active"));
+    function renderDots() {
+        if (!dotsContainer) return;
 
-        const startIdx = currentSlide * REVIEWS_PER_VIEW;
-        for (
-            let i = 0;
-            i < REVIEWS_PER_VIEW && startIdx + i < reviews.length;
-            i++
-        ) {
-            reviews[startIdx + i].classList.add("active");
-        }
+        dotsContainer.innerHTML = "";
+        const totalPages = getTotalPages();
 
-        if (dots[currentSlide]) {
-            dots[currentSlide].classList.add("active");
+        for (let i = 0; i < totalPages; i++) {
+            const dot = document.createElement("span");
+            dot.className = "dot";
+            if (i === currentPage) dot.classList.add("active");
+
+            dot.addEventListener("click", () => {
+                stopAutoSlide();
+                showPage(i);
+                startAutoSlide();
+            });
+
+            dotsContainer.appendChild(dot);
         }
     }
 
-    function nextSlide() {
-        showSlide(currentSlide + 1);
+    function showPage(page) {
+        const perView = getReviewsPerView();
+        const totalPages = getTotalPages();
+
+        if (page >= totalPages) currentPage = 0;
+        else if (page < 0) currentPage = totalPages - 1;
+        else currentPage = page;
+
+        reviews.forEach((r) => r.classList.remove("active"));
+
+        const start = currentPage * perView;
+        for (let i = 0; i < perView; i++) {
+            if (reviews[start + i]) {
+                reviews[start + i].classList.add("active");
+            }
+        }
+
+        renderDots();
     }
 
-    function prevSlide() {
-        showSlide(currentSlide - 1);
+    function nextPage() {
+        showPage(currentPage + 1);
+    }
+
+    function prevPage() {
+        showPage(currentPage - 1);
     }
 
     function startAutoSlide() {
-        clearInterval(reviewAutoSlideInterval);
-        reviewAutoSlideInterval = setInterval(nextSlide, 6000);
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(nextPage, 6000);
     }
 
     function stopAutoSlide() {
-        clearInterval(reviewAutoSlideInterval);
+        clearInterval(autoSlideInterval);
     }
 
+    // INIT
+    showPage(0);
     startAutoSlide();
 
-    if (nextBtn) {
-        nextBtn.addEventListener("click", function () {
-            stopAutoSlide();
-            nextSlide();
-            startAutoSlide();
-        });
-    }
+    nextBtn?.addEventListener("click", () => {
+        stopAutoSlide();
+        nextPage();
+        startAutoSlide();
+    });
 
-    if (prevBtn) {
-        prevBtn.addEventListener("click", function () {
-            stopAutoSlide();
-            prevSlide();
-            startAutoSlide();
-        });
-    }
+    prevBtn?.addEventListener("click", () => {
+        stopAutoSlide();
+        prevPage();
+        startAutoSlide();
+    });
 
-    dots.forEach((dot, index) => {
-        dot.addEventListener("click", function () {
-            stopAutoSlide();
-            showSlide(index);
+    // Responsive handling
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            currentPage = 0;
+            showPage(0);
             startAutoSlide();
-        });
+        }, 250);
     });
 });

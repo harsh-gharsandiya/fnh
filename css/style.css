@@ -177,8 +177,8 @@ input:-webkit-autofill:focus {
 }
 
 .logo-view > img {
-    max-height: 240px;
-    margin: 0 0 50px;
+    max-height: 230px;
+    margin: 0 0 40px;
 }
 .area-title h2 {
     color: #db3444;
@@ -308,7 +308,8 @@ a.readmore:hover {
 }
 
 .transparent-layer .main-area-bg::after {
-    background: rgb(219, 52, 68) url("img/pattarn.png");
+    /* background: rgb(219, 52, 68) url("img/pattarn.png"); */
+    background: rgb(219, 52, 68);
 }
 .contact-details .logo > img {
     max-height: 300px;
@@ -333,7 +334,8 @@ a.readmore:hover {
     height: 100%;
     -webkit-box-pack: center;
     -ms-flex-pack: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 20%;
     width: 100%;
     position: relative;
     z-index: 2;
@@ -1104,7 +1106,7 @@ body {
 .simple-slider img {
     flex: 0 0 33.3333%;
     max-width: 33.3333%;
-    max-height: 310px;
+    max-height: 280px;
     object-fit: cover;
     border-radius: 12%;
     transition:
@@ -1125,8 +1127,9 @@ body {
 .video-slide {
     flex: 0 0 33.3333%;
     max-width: 33.3333%;
-    max-height: 310px;
+    max-height: 280px;
     position: relative;
+    object-fit: cover;
     overflow: hidden;
     padding: 0 10px;
     box-sizing: border-box;
@@ -1149,8 +1152,8 @@ body {
 
 /* Play button */
 .video-play {
-    position: absolute;
-    top: 50%;
+    position: relative;
+    bottom: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 70px;
@@ -1167,7 +1170,8 @@ body {
     justify-content: center;
     transition: all 0.3s ease;
     z-index: 10;
-    padding-left: 5px; /* Offset triangle icon */
+    padding-left: 10px;
+    padding-top: 5px;
 }
 
 .video-play:hover {
@@ -1321,6 +1325,10 @@ body {
     padding: 5px;
 }
 
+.phone-text {
+    color: #fff;
+}
+
 .social-icon {
     width: 28px;
     height: 28px;
@@ -1361,6 +1369,8 @@ body {
     display: flex;
     gap: 20px;
     align-items: flex-start;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .review-card {
@@ -1371,6 +1381,7 @@ body {
     border-radius: 20px;
     padding: 30px;
     padding-bottom: 15px;
+
     opacity: 0;
     transform: translateX(100%);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1478,6 +1489,7 @@ body {
 .google-review-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     background: linear-gradient(135deg, #e33d3d 0%, #e33d3f 100%);
     color: #fff;
@@ -1503,6 +1515,7 @@ body {
 .menu-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     background: #dda400;
     color: #fff;
@@ -1545,11 +1558,11 @@ body {
 }
 
 #reviewPrev {
-    margin: 0 10px;
+    margin-right: 0 10px;
 }
 
 #reviewNext {
-    margin: 0 10px;
+    margin-left: 0 10px;
 }
 
 .review-nav-btn:hover {
@@ -1560,48 +1573,6 @@ body {
 
 .review-nav-btn:active {
     transform: scale(0.95);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .reviews-title {
-        font-size: 24px;
-        margin-bottom: 30px;
-    }
-
-    .slider-row {
-        gap: 10px;
-    }
-
-    .reviews-slider {
-        height: auto;
-        min-height: 350px;
-    }
-
-    .review-card {
-        min-width: 100%;
-    }
-
-    .review-card.active:nth-child(2) {
-        display: none;
-    }
-
-    .review-nav-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 24px;
-    }
-
-    .button-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .google-review-btn,
-    .menu-btn {
-        width: 100%;
-        max-width: 300px;
-    }
 }
 
 .phone-inline a {
